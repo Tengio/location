@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
 project.version = "8.4.0"
 project.group = "com.tengio"
@@ -26,4 +28,17 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.android.support:support-v13:23.1.1'
+}
+
+bintray {
+    user = BINTRAY_USER
+    key = BINTRAY_KEY
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = 'location'
+        userOrg = 'tengioltd'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/Tengio/locations.git'
+    }
 }

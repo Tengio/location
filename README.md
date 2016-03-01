@@ -25,6 +25,11 @@ dependencies {
 
 By adding locations library dependency you will automatically get the following dependencies:
 
+```
+com.google.android.gms:play-services-location:8.4.0
+com.android.support:support-v13:23.1.1
+```
+
 Gradle Plugins
 --------------
 

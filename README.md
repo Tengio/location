@@ -74,13 +74,13 @@ protected void onCreate(Bundle savedInstanceState) {
 
 @Override
 protected void onResume() {
-    super.onResume();
+    ...
     googleLocationService.register( this, this );
 }
 
 @Override
 protected void onPause() {
-    super.onPause();
+    ...
     googleLocationService.unregister();
 }
 ```
@@ -90,8 +90,7 @@ You have to pass the result to the library from you activity or fragment:
 ```    
 @Override
 public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-    super.onRequestPermissionsResult( requestCode, permissions, grantResults );
-
+    ...
     googleLocationService.onRequestPermissionResult(this, requestCode, grantResults);
 }
 ```

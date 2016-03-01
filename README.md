@@ -114,4 +114,9 @@ public void onConnectionFailed() {
 public void onLocationChanged(LatLng latLng) {
     Log.i( TAG, "Latitude: " + latLng.latitude + "\nLongitude: " + latLng.longitude);
 }
+
+@Override
+public void shouldShowRequestPermissionRationale() {
+    Log.d( TAG, "GPS Permission denied" );
+}
 ```

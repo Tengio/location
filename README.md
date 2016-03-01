@@ -107,6 +107,11 @@ public void onLocationChanged(LatLng latLng) {
 
 @Override
 public void shouldShowRequestPermissionRationale() {
+    Log.d( TAG, "GPS Permission missing, inform the user" );
+}
+
+@Override
+public void onPermissionDenied() {
     Log.d( TAG, "GPS Permission denied" );
 }
 ```

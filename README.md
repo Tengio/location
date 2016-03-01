@@ -84,16 +84,6 @@ protected void onPause() {
     googleLocationService.unregister();
 }
 ```
-
-The library asks for location permission to Marshmallow or greater devices. 
-You have to pass the result to the library from you activity or fragment:
-```    
-@Override
-public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-    ...
-    googleLocationService.onRequestPermissionResult(this, requestCode, grantResults);
-}
-```
 Your class need to implement the Location Listener:
 ```
 public class MainActivity extends AppCompatActivity implements GoogleLocationService.LocationListener {
@@ -118,5 +108,15 @@ public void onLocationChanged(LatLng latLng) {
 @Override
 public void shouldShowRequestPermissionRationale() {
     Log.d( TAG, "GPS Permission denied" );
+}
+```
+
+The library asks for location permission to Marshmallow or greater devices. 
+You have to pass the result to the library from you activity or fragment:
+```    
+@Override
+public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    ...
+    googleLocationService.onRequestPermissionResult(this, requestCode, grantResults);
 }
 ```

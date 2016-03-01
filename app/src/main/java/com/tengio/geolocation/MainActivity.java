@@ -19,9 +19,9 @@ public class MainActivity extends AppCompatActivity implements GoogleLocationSer
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
         googleLocationService = new GoogleLocationService.Builder()
-                .threaholdMeter( 250 )
-                .intervalsMeters( 500 )
-                .fastIntervalsMeters( 200 ).build();
+                .setDistance( 250 )
+                .setInterval( 500 )
+                .setFastestInterval( 200 ).build();
     }
 
     @Override
@@ -49,6 +49,11 @@ public class MainActivity extends AppCompatActivity implements GoogleLocationSer
     @Override
     public void onLocationChanged(LatLng latLng) {
         Log.i( TAG, "Latitude: " + latLng.latitude + "\nLongitude: " + latLng.longitude);
+    }
+
+    @Override
+    public void shouldShowRequestPermissionRationale() {
+        Log.d( TAG, "GPS Permission denied" );
     }
 
     @Override

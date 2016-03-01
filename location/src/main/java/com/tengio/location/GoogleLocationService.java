@@ -23,10 +23,10 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
                                               GoogleApiClient.OnConnectionFailedListener,
                                               com.google.android.gms.location.LocationListener {
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 2839;
-    private float threshold_meter;
-    private long intervals_ms;
-    private long fast_intervals_ms;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 89;
+    private float thresholdMeter;
+    private long interval;
+    private long fastestInterval;
 
     private final FusedLocationProviderApi locationProvider = LocationServices.FusedLocationApi;
     private LocationListener locationListener;
@@ -36,23 +36,34 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
     private Location lastLocation;
 
     public void register(final LocationListener listener, Fragment fragment) {
+        this.locationListener = listener;
         if (!hasAccessToLocation( fragment.getActivity() )) {
-            requestLocationPermission( fragment );
+            if (ActivityCompat.shouldShowRequestPermissionRationale( fragment.getActivity(),
+                                                                     Manifest.permission.ACCESS_FINE_LOCATION )) {
+                locationListener.shouldShowRequestPermissionRationale();
+            } else {
+                requestLocationPermission( fragment );
+            }
             return;
         }
-        registerListener( listener, fragment.getActivity() );
+        registerListener( fragment.getActivity() );
     }
 
     public void register(final LocationListener listener, Activity activity) {
+        this.locationListener = listener;
         if (!hasAccessToLocation( activity )) {
-            requestLocationPermission( activity );
+            if (ActivityCompat.shouldShowRequestPermissionRationale( activity,
+                                                                     Manifest.permission.ACCESS_FINE_LOCATION )) {
+                locationListener.shouldShowRequestPermissionRationale();
+            } else {
+                requestLocationPermission( activity );
+            }
             return;
         }
-        registerListener( listener, activity );
+        registerListener( activity );
     }
 
-    private void registerListener(LocationListener listener, Activity activity) {
-        this.locationListener = listener;
+    private void registerListener(Activity activity) {
         LocationManager locationManager = (LocationManager) activity.getSystemService( Context.LOCATION_SERVICE );
         if (!locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER )) {
             locationListener.onProviderDisabled();
@@ -65,6 +76,24 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
     private void buildLocationRequestAndGoogleConnection(Context context) {
         buildLocationRequest();
         buildGoogleApiClient( context );
+    }
+
+    private void buildLocationRequest() {
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority( LocationRequest.PRIORITY_LOW_POWER );
+        locationRequest.setInterval( interval );
+        locationRequest.setFastestInterval( fastestInterval );
+    }
+
+    private void buildGoogleApiClient(Context context) {
+        googleApiClient = new GoogleApiClient.Builder( context )
+                .addApi( LocationServices.API )
+                .addConnectionCallbacks( this )
+                .addOnConnectionFailedListener( this )
+                .build();
+        if (!googleApiClient.isConnected()) {
+            googleApiClient.connect();
+        }
     }
 
     public void unregister() {
@@ -101,31 +130,13 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
     public void onLocationChanged(Location newLocation) {
         if (lastLocation != null) {
             float distance = newLocation.distanceTo( lastLocation );
-            if (distance > threshold_meter) {
+            if (distance > thresholdMeter) {
                 notifyLocation( newLocation );
             }
         } else {
             notifyLocation( newLocation );
         }
         unregister();
-    }
-
-    private void buildLocationRequest() {
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority( LocationRequest.PRIORITY_LOW_POWER );
-        locationRequest.setInterval( intervals_ms );
-        locationRequest.setFastestInterval( fast_intervals_ms );
-    }
-
-    private void buildGoogleApiClient(Context context) {
-        googleApiClient = new GoogleApiClient.Builder( context )
-                .addApi( LocationServices.API )
-                .addConnectionCallbacks( this )
-                .addOnConnectionFailedListener( this )
-                .build();
-        if (!googleApiClient.isConnected()) {
-            googleApiClient.connect();
-        }
     }
 
     @SuppressWarnings("MissingPermission")
@@ -147,7 +158,7 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
         }
     }
 
-    private boolean hasAccessToLocation(Context context) {
+    public boolean hasAccessToLocation(Context context) {
         return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_FINE_LOCATION );
     }
@@ -171,6 +182,7 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             buildLocationRequestAndGoogleConnection( context );
         }
+        return;
     }
 
     public interface LocationListener {
@@ -180,26 +192,28 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
         void onConnectionFailed();
 
         void onLocationChanged(LatLng latLng);
+
+        void shouldShowRequestPermissionRationale();
     }
 
     public static class Builder {
 
-        private float threshold_meter = 250;
-        private long intervals_ms = 500;
-        private long fast_intervals_ms = 200;
+        private float thresholdMeter = 250;
+        private long interval = 500;
+        private long fastestInterval = 200;
 
-        public Builder threaholdMeter(float threshold_meter) {
-            this.threshold_meter = threshold_meter;
+        public Builder setDistance(float thresholdMeter) {
+            this.thresholdMeter = thresholdMeter;
             return this;
         }
 
-        public Builder intervalsMeters(int intervals_ms) {
-            this.intervals_ms = intervals_ms;
+        public Builder setInterval(long interval) {
+            this.interval = interval;
             return this;
         }
 
-        public Builder fastIntervalsMeters(int fast_intervals_ms) {
-            this.fast_intervals_ms = fast_intervals_ms;
+        public Builder setFastestInterval(long fastestInterval) {
+            this.fastestInterval = fastestInterval;
             return this;
         }
 
@@ -209,8 +223,8 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
     }
 
     private GoogleLocationService(Builder b) {
-        this.threshold_meter = b.threshold_meter;
-        this.intervals_ms = b.intervals_ms;
-        this.fast_intervals_ms = b.fast_intervals_ms;
+        this.thresholdMeter = b.thresholdMeter;
+        this.interval = b.interval;
+        this.fastestInterval = b.fastestInterval;
     }
 }

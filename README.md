@@ -3,7 +3,7 @@
 Version
 -------
 
-[ ![Download](https://api.bintray.com/packages/tengioltd/maven/locations/images/download.svg) ](https://bintray.com/tengioltd/maven/locations/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/tengioltd/maven/location/images/download.svg) ](https://bintray.com/tengioltd/maven/location/_latestVersion)
 
 Current version uses Google Play Services 8.4.0.
 

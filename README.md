@@ -19,7 +19,7 @@ Dependencies
 ```
 dependencies {
     ...
-    compile 'com.tengio:locations:latest_version'
+    compile 'com.tengio:location:latest_version'
 }
 ```
 

@@ -181,6 +181,8 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
         }
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             buildLocationRequestAndGoogleConnection( context );
+        }else{
+            locationListener.onPermissionDenied();
         }
         return;
     }
@@ -194,6 +196,8 @@ public class GoogleLocationService implements GoogleApiClient.ConnectionCallback
         void onLocationChanged(LatLng latLng);
 
         void shouldShowRequestPermissionRationale();
+
+        void onPermissionDenied();
     }
 
     public static class Builder {

@@ -53,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements GoogleLocationSer
 
     @Override
     public void shouldShowRequestPermissionRationale() {
+        Log.d( TAG, "GPS Permission missing, inform the user" );
+    }
+
+    @Override
+    public void onPermissionDenied() {
         Log.d( TAG, "GPS Permission denied" );
     }
 

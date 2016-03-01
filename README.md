@@ -112,7 +112,7 @@ public void shouldShowRequestPermissionRationale() {
 ```
 
 The library asks for location permission to Marshmallow or greater devices. 
-You have to pass the result to the library from you activity or fragment:
+You have to pass the result to the library from your activity or fragment:
 ```    
 @Override
 public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

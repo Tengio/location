@@ -96,3 +96,13 @@ public void onRequestPermissionsResult(int requestCode, String[] permissions, in
     locationClient.onRequestPermissionResult(this, requestCode, grantResults);
 }
 ```
+
+
+Library updates
+---------------
+
+We use bintray to deploy changes to jcenter. To deploy a new version make sure to define BINTRAY_USER and BINTRAY_KEY variables. Then run:
+
+```
+gradle bintrayUpload
+```

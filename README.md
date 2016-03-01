@@ -19,7 +19,9 @@ Dependencies
 ```
 dependencies {
     ...
-    compile 'com.tengio:location:latest_version'
+    compile('com.tengio:location:latest_version') {
+        transitive = true;    
+    }
 }
 ```
 
@@ -28,25 +30,6 @@ By adding locations library dependency you will automatically get the following 
 ```
 com.google.android.gms:play-services-location:8.4.0
 com.android.support:support-v13:23.1.1
-```
-
-Gradle Plugins
---------------
-
-In the root build.gradle file add: 
-```
-buildscript {
-...
-    dependencies {
-        ...
-        classpath 'com.google.gms:google-services:2.0.0-beta6'
-    }
-}
-```
-In the app build.gradle at the very bottom of the file (this it is probably just a temporary bug in google play 
-services plugin) place:
-```
-apply plugin: 'com.google.gms.google-services'
 ```
 
 
@@ -63,65 +46,53 @@ Activity or Fragment
 -------------
 
 ```
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    ...
-    googleLocationService = new GoogleLocationService.Builder()
-            .setDistance( 250 )
-            .setInterval( 500 )
-            .setFastestInterval( 200 ).build();
-}
+private LocationClient locationClient = GoogleLocationClient.Builder.newInstance().build();
 
 @Override
 protected void onResume() {
     ...
-    googleLocationService.register( this, this );
+    locationClient.register(new LocationListener() {
+                @Override
+                public void onProviderDisabled() {
+                    Log.d(TAG, "GPS Disabled");
+                }
+    
+                @Override
+                public void onConnectionFailed() {
+                    Log.e(TAG, "Error retrieving GPS signal");
+                }
+    
+                @Override
+                public void onShowRequestPermissionRationale() {
+                    Log.d(TAG, "GPS Permission missing, inform the user");
+                }
+    
+                @Override
+                public void onPermissionDenied() {
+                    Log.d(TAG, "GPS Permission denied");
+                }
+    
+                @Override
+                public void onLocationChanged(double latitude, double longitude) {
+                    Log.i(TAG, "Latitude: " + latitude + "\nLongitude: " + longitude);
+                }
+            }, this);
 }
 
 @Override
 protected void onPause() {
     ...
-    googleLocationService.unregister();
-}
-```
-Your class need to implement the Location Listener:
-```
-public class MainActivity extends AppCompatActivity implements GoogleLocationService.LocationListener {
-```
-It permit you to have the Listener methods implemented in your class:
-```
-@Override
-public void onProviderDisabled() {
-    Log.d( TAG, "GPS Disabled" );
-}
-
-@Override
-public void onConnectionFailed() {
-    Log.e( TAG, "Error retrieving GPS signal" );
-}
-
-@Override
-public void onLocationChanged(LatLng latLng) {
-    Log.i( TAG, "Latitude: " + latLng.latitude + "\nLongitude: " + latLng.longitude);
-}
-
-@Override
-public void shouldShowRequestPermissionRationale() {
-    Log.d( TAG, "GPS Permission missing, inform the user" );
-}
-
-@Override
-public void onPermissionDenied() {
-    Log.d( TAG, "GPS Permission denied" );
+    locationClient.unregister();
 }
 ```
 
 The library asks for location permission to Marshmallow or greater devices. 
 You have to pass the result to the library from your activity or fragment:
+
 ```    
 @Override
 public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
     ...
-    googleLocationService.onRequestPermissionResult(this, requestCode, grantResults);
+    locationClient.onRequestPermissionResult(this, requestCode, grantResults);
 }
 ```

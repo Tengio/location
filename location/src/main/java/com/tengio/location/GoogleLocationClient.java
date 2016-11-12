@@ -5,7 +5,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,6 +25,7 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
                                              GoogleApiClient.OnConnectionFailedListener,
                                              com.google.android.gms.location.LocationListener,
                                              LocationClient {
+
     private float thresholdMeter;
     private long interval;
     private long fastestInterval;
@@ -54,7 +54,7 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
     @Override
     public void register(final LocationListener listener, Activity activity) {
         this.locationListener = listener;
-        if(hasAccessToLocation(activity)) {
+        if (hasAccessToLocation(activity)) {
             registerListener(activity);
             return;
         }
@@ -152,12 +152,8 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
     }
 
     private void notifyLocation(Location location) {
-        notifyLocation(new LatLng(location.getLatitude(), location.getLongitude()));
-    }
-
-    private void notifyLocation(LatLng latLng) {
-        if (locationListener != null && latLng != null) {
-            locationListener.onLocationChanged(latLng.latitude, latLng.longitude);
+        if (locationListener != null && location != null) {
+            locationListener.onLocationChanged(location.getLatitude(), location.getLongitude());
         }
     }
 

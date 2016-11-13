@@ -5,7 +5,7 @@ Version
 
 [ ![Download](https://api.bintray.com/packages/tengioltd/maven/location/images/download.svg) ](https://bintray.com/tengioltd/maven/location/_latestVersion)
 
-Current version uses Google Play Services 8.4.0.
+Current version uses Google Play Services 9.8.0.
 
 Version will follows google play services version so that it is going to be even easier to implement.
 

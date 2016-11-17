@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">geolocation</string>
+    <string name="app_name">Location Demo</string>
+    <string name="latitude_label">Latitude:</string>
+    <string name="longitude_label">Longitude:</string>
+    <string name="loading">Loading…</string>
+    <string name="debug_messages_label">Debug Messages:</string>
 </resources>

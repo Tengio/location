@@ -71,7 +71,6 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
             locationListener.onProviderDisabled();
             return;
         }
-
         buildLocationRequestAndGoogleConnection(activity);
     }
 
@@ -163,6 +162,7 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
             return;
         }
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            locationListener.onPermissionAccepted();
             buildLocationRequestAndGoogleConnection(context);
         } else {
             locationListener.onPermissionDenied();

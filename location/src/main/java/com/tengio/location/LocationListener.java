@@ -11,4 +11,6 @@ public interface LocationListener {
     void onShowRequestPermissionRationale();
 
     void onLocationChanged(double latitude, double longitude);
+
+    void onPermissionAccepted();
 }

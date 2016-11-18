@@ -66,6 +66,13 @@ public class MainActivity extends AppCompatActivity {
                 longitude.setText("" + lon);
                 debugMessages.setText(null);
             }
+
+            @Override
+            public void onPermissionAccepted() {
+                debugMessages.setText("GPS Permission accepted");
+                latitude.setText("N/A");
+                longitude.setText("N/A");
+            }
         }, this);
     }
 

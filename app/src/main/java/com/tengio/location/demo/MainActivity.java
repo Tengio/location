@@ -22,9 +22,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        debugMessages = (TextView)findViewById(R.id.debug_messages);
-        latitude = (TextView)findViewById(R.id.latitude);
-        longitude = (TextView)findViewById(R.id.longitude);
+        debugMessages = (TextView) findViewById(R.id.debug_messages);
+        latitude = (TextView) findViewById(R.id.latitude);
+        longitude = (TextView) findViewById(R.id.longitude);
     }
 
     @Override

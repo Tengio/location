@@ -26,11 +26,10 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
                                              com.google.android.gms.location.LocationListener,
                                              LocationClient {
 
+    private final FusedLocationProviderApi locationProvider = LocationServices.FusedLocationApi;
     private float thresholdMeter;
     private long interval;
     private long fastestInterval;
-
-    private final FusedLocationProviderApi locationProvider = LocationServices.FusedLocationApi;
     private LocationListener locationListener;
     private boolean alreadyQueryingLocation;
     private GoogleApiClient googleApiClient;
@@ -169,7 +168,7 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
         }
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private float thresholdMeter = 250;
         private long interval = 500;

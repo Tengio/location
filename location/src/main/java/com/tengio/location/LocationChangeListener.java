@@ -21,4 +21,9 @@ public abstract class LocationChangeListener implements LocationListener {
     public void onShowRequestPermissionRationale() {
 
     }
+
+    @Override
+    public void onPermissionAccepted() {
+
+    }
 }

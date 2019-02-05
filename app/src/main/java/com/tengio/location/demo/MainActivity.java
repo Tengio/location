@@ -1,7 +1,7 @@
 package com.tengio.location.demo;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -9,7 +9,7 @@ import com.tengio.location.GoogleLocationClient;
 import com.tengio.location.LocationClient;
 import com.tengio.location.LocationListener;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     public static final String TAG = "Location";
 

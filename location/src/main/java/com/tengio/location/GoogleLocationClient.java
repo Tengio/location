@@ -1,57 +1,87 @@
 package com.tengio.location;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
-import android.support.v13.app.FragmentCompat;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 
 import static com.tengio.location.LocationPermissionUtil.hasAccessToLocation;
 import static com.tengio.location.LocationPermissionUtil.isLocationPermissionRequestCode;
 import static com.tengio.location.LocationPermissionUtil.requestLocationPermission;
 
-public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks,
-                                             GoogleApiClient.OnConnectionFailedListener,
-                                             com.google.android.gms.location.LocationListener,
+public class GoogleLocationClient implements OnSuccessListener<Location>,
                                              LocationClient {
 
-    private final FusedLocationProviderApi locationProvider = LocationServices.FusedLocationApi;
+    private FusedLocationProviderClient locationProvider ;
     private float thresholdMeter;
     private long interval;
     private long fastestInterval;
     private LocationListener locationListener;
     private boolean alreadyQueryingLocation;
-    private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
     private Location lastLocation;
+
+    private final LocationCallback callback = new LocationCallback() {
+
+        @Override
+        public void onLocationAvailability(LocationAvailability locationAvailability) {
+            super.onLocationAvailability(locationAvailability);
+        }
+
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+            if (locationResult == null || locationResult.getLocations().size() == 0) {
+                return;
+            }
+            Location location = locationResult.getLocations().get(0);
+            if (lastLocation != null) {
+                float distance = location.distanceTo(lastLocation);
+                if (distance > thresholdMeter) {
+                    notifyLocation(location);
+                }
+            } else {
+                notifyLocation(location);
+            }
+            unregister();
+        }
+    };
+
+
 
     @Override
     public void register(final LocationListener listener, Fragment fragment) {
+        if (fragment.getActivity() == null) {
+            return;
+        }
+        this.locationProvider = LocationServices.getFusedLocationProviderClient(fragment.getActivity());
         this.locationListener = listener;
-        if (hasAccessToLocation(fragment)) {
+        if (hasAccessToLocation(fragment) && fragment.getActivity() != null) {
             registerListener(fragment.getActivity());
             return;
         }
-        if (FragmentCompat.shouldShowRequestPermissionRationale(fragment, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (fragment.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
             locationListener.onShowRequestPermissionRationale();
         } else {
             requestLocationPermission(fragment);
         }
     }
 
+
     @Override
     public void register(final LocationListener listener, Activity activity) {
+        this.locationProvider = LocationServices.getFusedLocationProviderClient(activity);
         this.locationListener = listener;
         if (hasAccessToLocation(activity)) {
             registerListener(activity);
@@ -70,86 +100,33 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
             locationListener.onProviderDisabled();
             return;
         }
-        buildLocationRequestAndGoogleConnection(activity);
+        queryLocation();
     }
 
-    private void buildLocationRequestAndGoogleConnection(Context context) {
-        buildLocationRequest();
-        buildGoogleApiClient(context);
-    }
-
-    private void buildLocationRequest() {
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
-        locationRequest.setInterval(interval);
-        locationRequest.setFastestInterval(fastestInterval);
-    }
-
-    private void buildGoogleApiClient(Context context) {
-        googleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        if (!googleApiClient.isConnected()) {
-            googleApiClient.connect();
-        }
-    }
 
     @Override
     public void unregister() {
-        if (googleApiClient != null && googleApiClient.isConnected()) {
-            locationProvider.removeLocationUpdates(googleApiClient, this);
-            alreadyQueryingLocation = false;
-        }
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        if (alreadyQueryingLocation) {
-            return;
-        }
-        alreadyQueryingLocation = true;
-        if (googleApiClient.isConnected()) {
-            queryLocation();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        googleApiClient.reconnect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        if (locationListener != null) {
-            locationListener.onConnectionFailed();
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location newLocation) {
-        if (lastLocation != null) {
-            float distance = newLocation.distanceTo(lastLocation);
-            if (distance > thresholdMeter) {
-                notifyLocation(newLocation);
-            }
-        } else {
-            notifyLocation(newLocation);
-        }
-        unregister();
+        locationProvider.removeLocationUpdates(callback);
+        alreadyQueryingLocation = false;
     }
 
     @SuppressWarnings("MissingPermission")
     private void queryLocation() {
-        lastLocation = locationProvider.getLastLocation(googleApiClient);
-        if (lastLocation != null) {
-            notifyLocation(lastLocation);
+        if (alreadyQueryingLocation) {
+            return;
         }
-        locationProvider.requestLocationUpdates(googleApiClient, locationRequest, this);
+        locationProvider.getLastLocation().addOnSuccessListener(this);
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        locationRequest.setInterval(interval);
+        locationRequest.setFastestInterval(fastestInterval);
+        locationProvider.requestLocationUpdates(locationRequest, callback, null);
+        alreadyQueryingLocation = true;
     }
 
     private void notifyLocation(Location location) {
+        alreadyQueryingLocation = false;
+        lastLocation = location;
         if (locationListener != null && location != null) {
             locationListener.onLocationChanged(location.getLatitude(), location.getLongitude());
         }
@@ -162,9 +139,16 @@ public class GoogleLocationClient implements GoogleApiClient.ConnectionCallbacks
         }
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             locationListener.onPermissionAccepted();
-            buildLocationRequestAndGoogleConnection(context);
+            queryLocation();
         } else {
             locationListener.onPermissionDenied();
+        }
+    }
+
+    @Override
+    public void onSuccess(Location location) {
+        if (location != null) {
+            notifyLocation(lastLocation);
         }
     }
 

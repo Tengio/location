@@ -2,11 +2,12 @@ package com.tengio.location;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.pm.PackageManager;
-import android.support.v13.app.FragmentCompat;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 public final class LocationPermissionUtil {
 
@@ -21,15 +22,16 @@ public final class LocationPermissionUtil {
                 activity, Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
-    public static boolean hasAccessToLocation(Fragment fragment) {
+    public static boolean hasAccessToLocation(@NonNull Fragment fragment) {
+        if (fragment.getActivity() == null) {
+            return false;
+        }
         return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
                 fragment.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
     public static void requestLocationPermission(Fragment fragment) {
-        FragmentCompat.requestPermissions(fragment,
-                                          new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                          LOCATION_PERMISSION_REQUEST_CODE);
+        fragment.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
     }
 
     public static void requestLocationPermission(Activity activity) {

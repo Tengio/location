@@ -10,11 +10,17 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import android.Manifest;
 import android.app.Activity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
+
 import androidx.core.app.ActivityCompat;
 
 import static com.tengio.location.LocationPermissionUtil.hasAccessToLocation;
@@ -22,9 +28,10 @@ import static com.tengio.location.LocationPermissionUtil.isLocationPermissionReq
 import static com.tengio.location.LocationPermissionUtil.requestLocationPermission;
 
 public class GoogleLocationClient implements OnSuccessListener<Location>,
-                                             LocationClient {
+        LocationClient {
 
-    private FusedLocationProviderClient locationProvider ;
+    private static final String IS_QUERYING = "is_querying";
+    private FusedLocationProviderClient locationProvider;
     private float thresholdMeter;
     private long interval;
     private long fastestInterval;
@@ -54,33 +61,29 @@ public class GoogleLocationClient implements OnSuccessListener<Location>,
             } else {
                 notifyLocation(location);
             }
-            unregister();
+            unregister(null);
         }
     };
 
 
-
     @Override
-    public void register(final LocationListener listener, Fragment fragment) {
+    public void register(@NonNull final LocationListener listener, @NonNull Fragment fragment, @Nullable Bundle savedState) {
         if (fragment.getActivity() == null) {
             return;
         }
-        this.locationProvider = LocationServices.getFusedLocationProviderClient(fragment.getActivity());
-        this.locationListener = listener;
-        if (hasAccessToLocation(fragment) && fragment.getActivity() != null) {
-            registerListener(fragment.getActivity());
-            return;
-        }
-        if (fragment.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            locationListener.onShowRequestPermissionRationale();
-        } else {
-            requestLocationPermission(fragment);
+        register(listener, fragment.getActivity(), savedState);
+    }
+
+    private void initialiseState(Bundle savedState) {
+        if (savedState != null) {
+            alreadyQueryingLocation = savedState.getBoolean(IS_QUERYING, false);
         }
     }
 
 
     @Override
-    public void register(final LocationListener listener, Activity activity) {
+    public void register(@NonNull final LocationListener listener, @NonNull Activity activity, @Nullable Bundle savedState) {
+        initialiseState(savedState);
         this.locationProvider = LocationServices.getFusedLocationProviderClient(activity);
         this.locationListener = listener;
         if (hasAccessToLocation(activity)) {
@@ -94,6 +97,7 @@ public class GoogleLocationClient implements OnSuccessListener<Location>,
         }
     }
 
+
     private void registerListener(Activity activity) {
         LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -105,9 +109,13 @@ public class GoogleLocationClient implements OnSuccessListener<Location>,
 
 
     @Override
-    public void unregister() {
+    public void unregister(@Nullable Bundle savedState) {
+        if (savedState == null) {
+            alreadyQueryingLocation = false;
+        } else {
+            savedState.putBoolean(IS_QUERYING, alreadyQueryingLocation);
+        }
         locationProvider.removeLocationUpdates(callback);
-        alreadyQueryingLocation = false;
     }
 
     @SuppressWarnings("MissingPermission")
@@ -133,7 +141,7 @@ public class GoogleLocationClient implements OnSuccessListener<Location>,
     }
 
     @Override
-    public void onRequestPermissionResult(Context context, int requestCode, int[] grantResults) {
+    public void onRequestPermissionResult(int requestCode, int[] grantResults) {
         if (isLocationPermissionRequestCode(requestCode)) {
             return;
         }

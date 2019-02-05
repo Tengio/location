@@ -1,6 +1,8 @@
 package com.tengio.location;
 
-public interface LocationListener {
+import java.io.Serializable;
+
+public interface LocationListener extends Serializable {
 
     void onProviderDisabled();
 

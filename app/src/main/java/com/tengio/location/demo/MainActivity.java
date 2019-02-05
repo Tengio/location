@@ -22,14 +22,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        debugMessages = (TextView) findViewById(R.id.debug_messages);
-        latitude = (TextView) findViewById(R.id.latitude);
-        longitude = (TextView) findViewById(R.id.longitude);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        debugMessages = findViewById(R.id.debug_messages);
+        latitude = findViewById(R.id.latitude);
+        longitude = findViewById(R.id.longitude);
         locationClient.register(new LocationListener() {
             @Override
             public void onProviderDisabled() {
@@ -73,18 +68,18 @@ public class MainActivity extends Activity {
                 latitude.setText("N/A");
                 longitude.setText("N/A");
             }
-        }, this);
+        }, this, savedInstanceState);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        locationClient.unregister();
+    protected void onSaveInstanceState(Bundle outState) {
+        locationClient.unregister(outState);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        locationClient.onRequestPermissionResult(this, requestCode, grantResults);
+        locationClient.onRequestPermissionResult( requestCode, grantResults);
     }
 }

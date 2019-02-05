@@ -1,17 +1,19 @@
 package com.tengio.location;
 
 import android.app.Activity;
-import android.content.Context;
+import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 public interface LocationClient {
 
-    void register(LocationListener listener, Fragment fragment);
+    void register(@NonNull LocationListener listener, @NonNull Fragment fragment, @Nullable Bundle savedState);
 
-    void register(LocationListener listener, Activity activity);
+    void register(@NonNull LocationListener listener, @NonNull Activity activity, @Nullable Bundle savedState);
 
-    void unregister();
+    void unregister(@Nullable Bundle savedState);
 
-    void onRequestPermissionResult(Context context, int requestCode, int[] grantResults);
+    void onRequestPermissionResult(int requestCode, int[] grantResults);
 }
